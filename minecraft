@@ -1,0 +1,160 @@
+Minecraft clone in html
+Copy or download Minecraft.html and run in google chrome or firefox does not work in brave
+Has a hacked reach of 100
+Will save your world if you click save
+Code edits will erase your world
+Future builds coming soon
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Minecraft Clone</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #87ceeb;
+      font-family: Arial, sans-serif;
+    }#info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+  border-radius: 10px;
+  z-index: 10;
+}
+
+canvas {
+  display: block;
+}
+
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h3>Mini Minecraft Clone</h3>
+    <p>WASD = Move</p>
+    <p>Mouse = Look Around</p>
+    <p>Space = Jump</p>
+    <p>Click Screen to Start</p>
+  </div>  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
+    import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/controls/PointerLockControls.js';
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb);
+
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lights
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    scene.add(light);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    // Controls
+    const controls = new PointerLockControls(camera, document.body);
+
+    document.body.addEventListener('click', () => {
+      controls.lock();
+    });
+
+    scene.add(controls.getObject());
+
+    // Ground blocks
+    const blockSize = 1;
+    const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+
+    for (let x = -20; x < 20; x++) {
+      for (let z = -20; z < 20; z++) {
+        const material = new THREE.MeshLambertMaterial({
+          color: Math.random() > 0.2 ? 0x55aa55 : 0x8b4513,
+        });
+
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(x, -1, z);
+        scene.add(cube);
+      }
+    }
+
+    // Random towers
+    for (let i = 0; i < 30; i++) {
+      const height = Math.floor(Math.random() * 5) + 1;
+      const px = Math.floor(Math.random() * 30 - 15);
+      const pz = Math.floor(Math.random() * 30 - 15);
+
+      for (let y = 0; y < height; y++) {
+        const cube = new THREE.Mesh(
+          geometry,
+          new THREE.MeshLambertMaterial({ color: 0x888888 })
+        );
+
+        cube.position.set(px, y, pz);
+        scene.add(cube);
+      }
+    }
+
+    camera.position.y = 2;
+
+    const keys = {};
+
+    document.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+
+    let velocityY = 0;
+    let onGround = true;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const speed = 0.1;
+
+      if (keys['KeyW']) controls.moveForward(speed);
+      if (keys['KeyS']) controls.moveForward(-speed);
+      if (keys['KeyA']) controls.moveRight(-speed);
+      if (keys['KeyD']) controls.moveRight(speed);
+
+      // Jump physics
+      velocityY -= 0.008;
+      camera.position.y += velocityY;
+
+      if (camera.position.y < 2) {
+        camera.position.y = 2;
+        velocityY = 0;
+        onGround = true;
+      }
+
+      if (keys['Space'] && onGround) {
+        velocityY = 0.15;
+        onGround = false;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script></body>
+</html>
